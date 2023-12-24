@@ -63,13 +63,22 @@ class MapViewController extends GetxController {
       destinationPoint!,
       roadType: selectedRoadType.value,
       roadOption: const RoadOption(
-        roadColor: Colors.black,
+        roadColor: Colors.orangeAccent,
         roadBorderWidth: 10,
+        roadBorderColor: Colors.deepOrange,
+        roadWidth: 20,
       ),
     );
 
-    distance.value = "${roadInfo.distance ?? 0} KM";
-    time.value = "${roadInfo.duration ?? 0} Sec";
+    final double distanceInMiles = (roadInfo.distance ?? 0) * 1000;
+    distance.value = "${distanceInMiles.round()} Meters";
+
+    final durationInSeconds = (roadInfo.duration ?? 0).round();
+    final durationInMinutes = (durationInSeconds / 60).round();
+
+    time.value = durationInSeconds <= 60
+        ? "$durationInSeconds Sec"
+        : "$durationInMinutes Min";
   }
 
   Future<void> checkPermission() async {

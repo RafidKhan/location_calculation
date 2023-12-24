@@ -105,15 +105,16 @@ class MapViewScreen extends StatelessWidget {
                         children:
                             List.generate(controller.roadTypes.length, (index) {
                           late final IconData icon;
-
-                          if (index == 0) {
-                            icon = Icons.car_rental;
-                          } else if (index == 1) {
-                            icon = Icons.directions_bike;
-                          } else if (index == 2) {
-                            icon = Icons.directions_walk;
-                          }
                           final type = controller.roadTypes[index];
+                          if (type == RoadType.car) {
+                            icon = Icons.car_rental;
+                          } else if (type == RoadType.bike) {
+                            icon = Icons.directions_bike;
+                          } else if (type == RoadType.foot) {
+                            icon = Icons.directions_walk;
+                          } else {
+                            icon = Icons.info;
+                          }
 
                           return Container(
                             color: Colors.white,
