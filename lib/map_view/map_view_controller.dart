@@ -1,0 +1,133 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_osm_plugin/flutter_osm_plugin.dart';
+import 'package:get/get.dart';
+import 'package:location/location.dart';
+
+const markerIcon = MarkerIcon(
+  icon: Icon(
+    Icons.place,
+    color: Colors.red,
+    size: 15,
+  ),
+);
+
+class MapViewController extends GetxController {
+  RxBool isLoading = true.obs;
+  RxString distance = "".obs;
+  RxString time = "".obs;
+
+  late final MapController mapController;
+
+  final List<GeoPoint> positions = [];
+
+  GeoPoint? myCurrentPoint;
+  GeoPoint? destinationPoint;
+
+  final Location location = Location();
+
+  @override
+  onInit() {
+    super.onInit();
+    setMapController();
+  }
+
+  Future<void> addNewLocation(GeoPoint start) async {
+    myCurrentPoint = start;
+    positions.add(myCurrentPoint!);
+
+    await mapController.removeLastRoad();
+    await mapController.removeMarkers(positions);
+    await mapController.addMarker(
+      destinationPoint!,
+      markerIcon: markerIcon,
+    );
+    await mapController.addMarker(
+      start,
+      markerIcon: markerIcon,
+    );
+
+    final RoadInfo roadInfo = await mapController.drawRoad(
+      myCurrentPoint!,
+      destinationPoint!,
+      roadType: RoadType.car,
+      roadOption: const RoadOption(
+        roadColor: Colors.black,
+        roadBorderWidth: 10,
+      ),
+    );
+
+    distance.value = "${roadInfo.distance ?? 0} KM";
+    time.value = "${roadInfo.duration ?? 0} Sec";
+  }
+
+  Future<void> checkPermission() async {
+    bool serviceEnabled;
+    PermissionStatus permissionGranted;
+
+    serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      serviceEnabled = await location.requestService();
+      if (!serviceEnabled) {
+        return;
+      }
+    }
+
+    permissionGranted = await location.hasPermission();
+    if (permissionGranted == PermissionStatus.denied) {
+      permissionGranted = await location.requestPermission();
+      if (permissionGranted != PermissionStatus.granted) {
+        return;
+      }
+    }
+  }
+
+  Future listenToPosition() async {
+    checkPermission().then((value) {
+      location.onLocationChanged.listen((LocationData currentLocation) {
+        addNewLocation(
+          GeoPoint(
+            latitude: currentLocation.latitude ?? 0,
+            longitude: currentLocation.longitude ?? 0,
+          ),
+        );
+      });
+    });
+  }
+
+  setMapController() {
+    isLoading.value = true;
+    checkPermission().then((value) async {
+      final position = await location.getLocation();
+      myCurrentPoint = GeoPoint(
+        latitude: position.latitude ?? 0,
+        longitude: position.longitude ?? 0,
+      );
+
+      mapController = MapController(
+        initPosition: myCurrentPoint,
+      );
+
+      isLoading.value = false;
+    });
+  }
+
+  pickLocation(BuildContext context) async {
+    await showSimplePickerLocation(
+      context: context,
+      isDismissible: true,
+      title: "Pick Location",
+      textConfirmPicker: "pick",
+      zoomOption: const ZoomOption(initZoom: 40),
+      initCurrentUserPosition: const UserTrackingOption(
+        enableTracking: true,
+        unFollowUser: true,
+      ),
+    ).then((position) async {
+      if (position != null) {
+        await mapController.goToLocation(position);
+        destinationPoint = position;
+        listenToPosition();
+      }
+    });
+  }
+}
