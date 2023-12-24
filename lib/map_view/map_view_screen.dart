@@ -92,7 +92,51 @@ class MapViewScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                  )
+                  ),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      width: MediaQuery.of(context).size.width,
+                      margin: const EdgeInsets.only(bottom: 20),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children:
+                            List.generate(controller.roadTypes.length, (index) {
+                          late final IconData icon;
+
+                          if (index == 0) {
+                            icon = Icons.car_rental;
+                          } else if (index == 1) {
+                            icon = Icons.directions_bike;
+                          } else if (index == 2) {
+                            icon = Icons.directions_walk;
+                          }
+                          final type = controller.roadTypes[index];
+
+                          return Container(
+                            color: Colors.white,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 10,
+                              vertical: 10,
+                            ),
+                            child: InkWell(
+                              onTap: () {
+                                controller.selectRoadType(type);
+                              },
+                              child: Icon(
+                                icon,
+                                color: type == controller.selectedRoadType.value
+                                    ? Colors.blue
+                                    : null,
+                              ),
+                            ),
+                          );
+                        }),
+                      ),
+                    ),
+                  ),
                 ],
               ),
       );

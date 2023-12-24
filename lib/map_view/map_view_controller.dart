@@ -16,6 +16,18 @@ class MapViewController extends GetxController {
   RxString distance = "".obs;
   RxString time = "".obs;
 
+  Rx<RoadType> selectedRoadType = Rx<RoadType>(RoadType.car);
+
+  final List<RoadType> roadTypes = [
+    RoadType.car,
+    RoadType.bike,
+    RoadType.foot,
+  ];
+
+  void selectRoadType(RoadType roadType) {
+    selectedRoadType.value = roadType;
+  }
+
   late final MapController mapController;
 
   final List<GeoPoint> positions = [];
@@ -49,7 +61,7 @@ class MapViewController extends GetxController {
     final RoadInfo roadInfo = await mapController.drawRoad(
       myCurrentPoint!,
       destinationPoint!,
-      roadType: RoadType.car,
+      roadType: selectedRoadType.value,
       roadOption: const RoadOption(
         roadColor: Colors.black,
         roadBorderWidth: 10,
