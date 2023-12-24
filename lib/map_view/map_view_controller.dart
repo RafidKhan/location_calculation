@@ -71,10 +71,11 @@ class MapViewController extends GetxController {
     );
 
     final double distanceInMiles = (roadInfo.distance ?? 0) * 1000;
-    distance.value = "${distanceInMiles.round()} Meters";
+    distance.value = "${distanceInMiles.toStringAsFixed(2)} Meters";
 
-    final durationInSeconds = (roadInfo.duration ?? 0).round();
-    final durationInMinutes = (durationInSeconds / 60).round();
+    final durationInSeconds = roadInfo.duration ?? 0;
+    final durationInMinutes =
+        double.parse((durationInSeconds / 60).toStringAsFixed(2));
 
     time.value = durationInSeconds <= 60
         ? "$durationInSeconds Sec"
